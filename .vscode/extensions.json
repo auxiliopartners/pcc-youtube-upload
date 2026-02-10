@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "samverschueren.linter-xo",
+    "1password.op-vscode",
+    "ms-vscode-remote.remote-containers"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "claudeCode.allowDangerouslySkipPermissions": true,
+  "editor.formatOnSave": true,
+  "xo.enable": true,
+  "xo.format.enable": true,
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "samverschueren.linter-xo"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "samverschueren.linter-xo"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "samverschueren.linter-xo"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "samverschueren.linter-xo"
+  },
+  "editor.tabSize": 2
+}
