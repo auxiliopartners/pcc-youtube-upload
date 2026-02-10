@@ -60,3 +60,11 @@ Thumbs.db
 tmp
 temp
 *.tmp
+
+# OAuth credentials and tokens
+credentials.json
+tokens.json
+
+# Upload state
+upload-state.json
+upload-report.json
