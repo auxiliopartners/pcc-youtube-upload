@@ -41,6 +41,9 @@
     "ora": "^9.3.0",
     "pino": "^10.1.0"
   },
+  "resolutions": {
+    "@eslint/plugin-kit": ">=0.3.4"
+  },
   "xo": {
     "space": 2,
     "semicolon": false,
