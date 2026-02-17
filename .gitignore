@@ -68,3 +68,8 @@ tokens.json
 # Upload state
 upload-state.json
 upload-report.json
+
+# Example files
+library.json
+manifest.json
+series.json

@@ -46,6 +46,9 @@ export function setVideoState(state, itemId, videoState) {
 }
 
 export function setPlaylistState(state, seriesId, playlistInfo) {
-  state.playlists[seriesId] = playlistInfo
+  state.playlists[seriesId] = {
+    ...state.playlists[seriesId],
+    ...playlistInfo,
+  }
   saveState(state)
 }

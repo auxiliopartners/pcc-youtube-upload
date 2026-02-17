@@ -39,6 +39,7 @@ yarn start upload
 | `yarn start upload` | Start or resume the upload process |
 | `yarn start upload --dry-run` | Preview what would be uploaded without making changes |
 | `yarn start upload --item <id>` | Upload a single item by manifest ID |
+| `yarn fix-playlists` | Retry adding uploaded videos to their playlists |
 | `yarn start status` | Show current quota usage and upload progress |
 | `yarn start report` | Generate a JSON report of all uploads |
 
