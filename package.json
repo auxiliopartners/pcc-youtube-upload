@@ -1,6 +1,6 @@
 {
   "name": "pcc-youtube-upload",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Upload a sermon media archive to Youtube",
   "packageManager": "yarn@4.11.0",
   "type": "module",
