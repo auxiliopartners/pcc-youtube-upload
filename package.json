@@ -19,8 +19,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "fix-playlists": "node src/index.js fix-playlists",
-    "playlists": "node src/index.js playlists",
     "lint": "xo",
     "lint:fix": "xo --fix"
   },
@@ -41,8 +39,7 @@
     "commander": "^14.0.3",
     "google-auth-library": "^9.0.0",
     "ora": "^9.3.0",
-    "pino": "^10.1.0",
-    "sharp": "^0.34.5"
+    "pino": "^10.1.0"
   },
   "resolutions": {
     "@eslint/plugin-kit": ">=0.3.4"

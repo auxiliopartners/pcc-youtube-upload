@@ -18,7 +18,7 @@ https://pacificcrossroads.org
 finance@pacificcrossroads.org
 
 ### Describe your organization's work as it relates to YouTube * [1000 characters]
-Pacific Crossroads Church is a nonprofit in Los Angeles that uses YouTube to livestream weekly services and publish sermon recordings. We have an archive of 505 past sermon videos stored on a Google Shared Drive that we need to upload to our YouTube channel, organized into 72 series playlists.
+Pacific Crossroads Church is a nonprofit in Los Angeles that uses YouTube to livestream weekly services and publish sermon recordings. We have an archive of 505 past sermon videos stored on a Google Shared Drive that we need to upload to our YouTube channel with custom thumbnails.
 
 ### Google representative email address
 N/A
@@ -68,20 +68,17 @@ Data API
 #### "Additional Quota" = "Total Quota Needed" - "Current Allocated Quota"
 
 ### Justification for requesting additional quota? * [1000 characters]
-We have a one-time bulk upload of 505 archived sermon videos from Google Shared Drive to YouTube, organized into 72 series playlists.
+We have a one-time bulk upload of 505 archived sermon videos from Google Shared Drive to YouTube with custom thumbnails.
 
 Per-video API cost:
 - videos.insert: 1,600 units
 - thumbnails.set: 50 units
-- playlistItems.insert: 50 units
-- Total per video: 1,700 units
+- Total per video: 1,650 units
 
-505 videos x 1,700 = 858,500 units
-72 playlists x 100 (create + thumbnail) = 7,200 units
-Grand total: ~866,000 units for the entire project.
+505 videos x 1,650 = 833,250 units for the entire project.
 
-At 10,000 units/day: ~5 videos/day, ~100 days.
-At 100,000 units/day: ~58 videos/day, complete in ~9 days.
+At 10,000 units/day: ~6 videos/day, ~85 days.
+At 100,000 units/day: ~60 videos/day, complete in ~9 days.
 
 Daily usage: Sequential uploads with 5-second delays. Peak QPS is 1 (single-threaded, no concurrent uploads). The tool tracks quota locally and automatically pauses at the daily limit, resuming after midnight Pacific.
 
@@ -95,28 +92,20 @@ Our CLI tool ("PCC YouTube Upload CLI") performs these API operations:
 
 2. youtube.thumbnails.set (50 units) — Set custom thumbnail from our Drive archive for each video.
 
-3. youtube.playlists.list (1 unit) — Check for existing playlists to avoid duplicates.
-
-4. youtube.playlists.insert (50 units) — Create a playlist for each sermon series (72 total).
-
-5. youtube.playlistItems.insert (50 units) — Add each uploaded video to its series playlist.
-
-6. youtube.playlistImages.insert (50 units) — Set playlist cover images from series artwork.
-
-7. youtube.channels.list (1 unit) — Select brand account channel during auth.
+3. youtube.channels.list (1 unit) — Select brand account channel during auth.
 
 The tool runs sequentially (one video at a time), saves state after each operation, tracks quota locally, and automatically pauses when daily quota is exhausted.
 
 ### What functionality would your API client be lacking without more quota? * [1000 characters]
-Without additional quota, the bulk archive upload would take approximately 100 days to complete (~5 videos per day at the default 10,000 unit quota). This significantly delays making our church's 505-video sermon archive accessible to our congregation on YouTube.
+Without additional quota, the bulk archive upload would take approximately 85 days to complete (~6 videos per day at the default 10,000 unit quota). This significantly delays making our church's 505-video sermon archive accessible to our congregation on YouTube.
 
-Our tool handles quota exhaustion gracefully — it tracks usage, pauses when the daily limit is reached, and automatically resumes after midnight Pacific. However, at the current rate, this one-time migration would stretch from under two weeks to over three months, during which we must maintain the archive on Google Shared Drive and keep the process running daily.
+Our tool handles quota exhaustion gracefully — it tracks usage, pauses when the daily limit is reached, and automatically resumes after midnight Pacific. However, at the current rate, this one-time migration would stretch from under two weeks to nearly three months, during which we must maintain the archive on Google Shared Drive and keep the process running daily.
 
 All functionality works correctly at the current quota level. This is purely a throughput limitation for a temporary bulk operation.
 
 ### What potential workarounds would you use to compensate for less quota? (ex. decreased feature set, estimations, smaller sampling) * [1000 characters]
 #### Ex: decreased feature set, estimated change in usage, etc.
-Without a quota increase, our primary workaround would be to accept the slower pace of ~5 videos/day and run the tool continuously over ~100 days. Our tool supports this — it saves state after each upload, resumes from where it left off, and automatically pauses and resumes across daily quota resets.
+Without a quota increase, our primary workaround would be to accept the slower pace of ~6 videos/day and run the tool continuously over ~85 days. Our tool supports this — it saves state after each upload, resumes from where it left off, and automatically pauses and resumes across daily quota resets.
 
 We could prioritize a subset of the archive (e.g., most recent sermons first) and upload the remainder over time.
 

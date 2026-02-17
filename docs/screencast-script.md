@@ -9,7 +9,7 @@ Recording guide for the YouTube API quota extension form submission. Target leng
 **Show:** Terminal with the project directory open.
 
 **Narration:**
-> This is the PCC YouTube Upload CLI, a tool built by Pacific Crossroads Church to upload our sermon video archive to YouTube. We have 505 sermon videos stored on a Google Shared Drive that we need to migrate to our YouTube channel, organized into 72 series playlists with custom thumbnails. The tool uses the YouTube Data API v3 for uploads, thumbnail setting, and playlist management.
+> This is the PCC YouTube Upload CLI, a tool built by Pacific Crossroads Church to upload our sermon video archive to YouTube. We have 505 sermon videos stored on a Google Shared Drive that we need to migrate to our YouTube channel with custom thumbnails. The tool uses the YouTube Data API v3 for uploads and thumbnail setting.
 
 **Commands to run:**
 ```bash
@@ -32,8 +32,6 @@ Options:
 Commands:
   auth                Run OAuth 2.0 authentication flow
   upload [options]    Start or resume the upload process
-  playlists [options] Create playlists from series data and ensure thumbnails are set
-  fix-playlists       Retry adding uploaded videos to their playlists
   status              Show current quota and upload status
   report              Generate upload report from current state
   help [command]      display help for a specific command
@@ -46,7 +44,7 @@ Commands:
 **Show:** File listing of the `src/` directory.
 
 **Narration:**
-> The project is organized into focused modules. The main entry point is index.js which defines the CLI commands. Auth handles OAuth 2.0 with credentials stored securely in 1Password. Drive handles streaming files from our Shared Drive. YouTube wraps the API client with retry logic. Metadata builds the video title, description, and tags. Upload manages the main upload loop. Quota tracks our daily API usage. State persists progress to disk so we can resume if interrupted.
+> The project is organized into focused modules. The main entry point is index.js which defines the CLI commands. Auth handles OAuth 2.0 with credentials stored securely in 1Password. Drive handles streaming files from our Shared Drive. YouTube wraps the API client with retry logic. Metadata builds the video title, description, and tags. Upload manages the main upload loop with quota-aware sleeping. Quota tracks our daily API usage. State persists progress to disk so we can resume if interrupted.
 
 **Commands to run:**
 ```bash
@@ -60,7 +58,6 @@ drive.js      - Google Drive file streaming
 index.js      - CLI entry point and command definitions
 manifest.js   - Load and filter manifest data from Drive
 metadata.js   - Build video titles, descriptions, tags
-playlists.js  - Playlist creation and management
 quota.js      - Daily quota tracking and enforcement
 report.js     - Upload progress report generation
 state.js      - State persistence and resumption
@@ -118,7 +115,6 @@ node src/index.js status
   Failed:     0
   Uploading:  0
   Pending:    0
-  Playlists:  0
 ```
 
 ---
@@ -170,7 +166,7 @@ Estimated days at 6 videos/day: 78
 **Show:** Upload a single video to demonstrate the full pipeline.
 
 **Narration:**
-> Now let me show a real upload. Using the --item flag, we can upload a single video to demonstrate the complete pipeline. Watch the steps: first it streams the video from our Shared Drive and uploads it to YouTube with all the metadata. You can see the upload progress percentage. Then it sets the custom thumbnail. Then it adds the video to its series playlist. Finally, it saves the state and generates a report.
+> Now let me show a real upload. Using the --item flag, we can upload a single video to demonstrate the complete pipeline. Watch the steps: first it streams the video from our Shared Drive and uploads it to YouTube with all the metadata. You can see the upload progress percentage. Then it sets the custom thumbnail. Finally, it saves the state and generates a report.
 
 **Command:**
 ```bash
@@ -195,9 +191,9 @@ node src/index.js status
 ```
 --- Quota Status ---
   Daily quota:      10000 units
-  Used today:       1700 units
-  Remaining:        8300 units
-  Videos remaining: 4 today
+  Used today:       1650 units
+  Remaining:        8350 units
+  Videos remaining: 5 today
   Reset date:       2025-02-11
 
 --- Upload Status ---
@@ -205,10 +201,9 @@ node src/index.js status
   Failed:     0
   Uploading:  0
   Pending:    0
-  Playlists:  1
 ```
 
-**Point out:** "Notice the quota tracker — that one upload used exactly 1,700 units: 1,600 for the video, 50 for the thumbnail, and 50 for the playlist add."
+**Point out:** "Notice the quota tracker — that one upload used exactly 1,650 units: 1,600 for the video and 50 for the thumbnail."
 
 ---
 
@@ -217,9 +212,9 @@ node src/index.js status
 **Show:** The quota constants in the code and the status output.
 
 **Narration:**
-> The tool tracks every API unit spent. Here in quota.js you can see the cost constants — 1,600 for a video upload, 50 for a thumbnail, 50 for a playlist operation. The tool checks before each upload whether it can afford the full 1,700-unit cost. If the daily quota is exhausted, it automatically sleeps until midnight Pacific time and resumes. This means we can start the tool and let it run unattended — it will upload as many videos as the quota allows each day and pause overnight.
+> The tool tracks every API unit spent. Here in quota.js you can see the cost constants — 1,600 for a video upload and 50 for a thumbnail. The tool checks before each upload whether it can afford the full 1,650-unit cost. If the daily quota is exhausted, it automatically sleeps until midnight Pacific time and resumes. This means we can start the tool and let it run unattended — it will upload as many videos as the quota allows each day and pause overnight.
 
-**Show:** Open `src/quota.js` and highlight lines 3-10 (the cost constants) and lines 34-37 (`canUploadMore` function).
+**Show:** Open `src/quota.js` and highlight the cost constants and the `canUploadMore` function.
 
 ---
 
@@ -228,7 +223,7 @@ node src/index.js status
 **Show:** The upload-state.json file.
 
 **Narration:**
-> All progress is saved to upload-state.json after every single operation. If the tool crashes, loses network, or is stopped manually, it picks up exactly where it left off on the next run. Each video tracks its status through the pipeline — pending, uploading, uploaded, and finally complete. Failed uploads are recorded with the error message and can be retried. The fix-playlists command can also retry any playlist additions that failed separately.
+> All progress is saved to upload-state.json after every single operation. If the tool crashes, loses network, or is stopped manually, it picks up exactly where it left off on the next run. Each video tracks its status through the pipeline — pending, uploading, uploaded, and finally complete. Failed uploads are recorded with the error message and can be retried.
 
 **Command:**
 ```bash
