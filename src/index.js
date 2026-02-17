@@ -8,7 +8,7 @@ import {initDrive} from './drive.js'
 import {initYouTube} from './youtube.js'
 import {loadManifests} from './manifest.js'
 import {ensurePlaylists} from './playlists.js'
-import {runUpload} from './upload.js'
+import {runUpload, retryPlaylistAdds} from './upload.js'
 import {loadState} from './state.js'
 import {getQuotaStatus} from './quota.js'
 import {generateReport} from './report.js'
@@ -47,7 +47,15 @@ program
 
       // Ensure playlists exist (unless dry run)
       if (!options.dryRun) {
-        await ensurePlaylists(series, state)
+        let playlistSeries = series
+        if (options.item) {
+          const targetItem = items.find(i => i.id === options.item)
+          playlistSeries = targetItem?.series?.id
+            ? series.filter(s => s.id === targetItem.series.id)
+            : []
+        }
+
+        await ensurePlaylists(playlistSeries, state)
       }
 
       // Run upload
@@ -64,6 +72,72 @@ program
     } catch (error) {
       logger.error({err: error}, 'Upload failed')
       console.error(chalk.red(`Upload failed: ${error.message}`))
+      process.exit(1)
+    }
+  })
+
+program
+  .command('playlists')
+  .description('Create playlists from series data and ensure thumbnails are set')
+  .option('--dry-run', 'Preview what would be created or updated')
+  .action(async options => {
+    try {
+      const {oauth2Client} = await getAuthenticatedClient()
+      initDrive(oauth2Client)
+      initYouTube(oauth2Client)
+
+      const {series} = await loadManifests()
+      const state = loadState()
+
+      if (options.dryRun) {
+        console.log(chalk.bold('\n--- Playlist Dry Run ---\n'))
+        console.log(`Series in manifest: ${series.length}`)
+        console.log(`Playlists in state: ${Object.keys(state.playlists).length}\n`)
+
+        await ensurePlaylists(series, state, {dryRun: true})
+
+        const needsCreate = series.filter(s => !state.playlists[s.id]).length
+        const needsThumbnail = Object.values(state.playlists)
+          .filter(p => !p.thumbnailSet).length
+
+        console.log(`\nSummary: ${needsCreate} to create, ${needsThumbnail} thumbnails to fix`)
+        console.log('\n--- End Dry Run ---\n')
+        return
+      }
+
+      console.log(chalk.bold(`\nProcessing ${series.length} series...\n`))
+
+      const result = await ensurePlaylists(series, state, {fixThumbnails: true})
+
+      const summary = `\nDone! Created ${result.created}, matched ${result.matched} existing, `
+        + `set ${result.thumbnailsSet} thumbnails, skipped ${result.skipped} already complete.`
+      console.log(chalk.green(summary))
+    } catch (error) {
+      logger.error({err: error}, 'Playlist creation failed')
+      console.error(chalk.red(`Playlist creation failed: ${error.message}`))
+      process.exit(1)
+    }
+  })
+
+program
+  .command('fix-playlists')
+  .description('Retry adding uploaded videos to their playlists')
+  .action(async () => {
+    try {
+      const {oauth2Client} = await getAuthenticatedClient()
+      initDrive(oauth2Client)
+      initYouTube(oauth2Client)
+
+      const {items, series} = await loadManifests()
+      const state = loadState()
+
+      await ensurePlaylists(series, state)
+
+      const {fixed, errors} = await retryPlaylistAdds(items, state)
+      console.log(chalk.green(`\nDone! Fixed ${fixed} playlist additions with ${errors} errors.`))
+    } catch (error) {
+      logger.error({err: error}, 'Fix playlists failed')
+      console.error(chalk.red(`Fix playlists failed: ${error.message}`))
       process.exit(1)
     }
   })

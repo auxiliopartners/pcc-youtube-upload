@@ -3,7 +3,7 @@ import {Readable} from 'node:stream'
 import {drive} from '@googleapis/drive'
 import logger from '../utils/logger.js'
 
-const SHARED_DRIVE_ID = '0ADp1d22rJVx5Uk9PVA'
+const SHARED_DRIVE_ID = process.env.GOOGLE_SHARED_DRIVE_ID
 
 let driveClient
 

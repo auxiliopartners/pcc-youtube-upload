@@ -92,3 +92,23 @@ export async function setThumbnail(videoId, thumbnailStream, mimeType) {
 
   return response.data
 }
+
+export async function setPlaylistThumbnail(playlistId, imageStream, mimeType) {
+  const yt = getYouTube()
+
+  const response = await yt.playlistImages.insert({
+    part: ['snippet'],
+    requestBody: {
+      snippet: {
+        playlistId,
+        type: 'hero',
+      },
+    },
+    media: {
+      mimeType,
+      body: imageStream,
+    },
+  })
+
+  return response.data
+}

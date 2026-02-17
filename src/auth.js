@@ -1,4 +1,5 @@
 import {createServer} from 'node:http'
+import {createInterface} from 'node:readline'
 import {fileURLToPath} from 'node:url'
 import fs from 'node:fs'
 import path from 'node:path'
@@ -95,6 +96,12 @@ async function waitForAuthCode(authUrl) {
   })
 }
 
+function prompt(rl, question) {
+  return new Promise(resolve => {
+    rl.question(question, resolve)
+  })
+}
+
 async function selectChannel(oauth2Client) {
   const yt = youtube({version: 'v3', auth: oauth2Client})
   const response = await yt.channels.list({
@@ -102,34 +109,38 @@ async function selectChannel(oauth2Client) {
     mine: true,
   })
 
-  const channels = response.data.items
-  if (!channels || channels.length === 0) {
-    throw new Error('No YouTube channels found for this account.')
-  }
+  const channels = response.data.items || []
+  const rl = createInterface({input: process.stdin, output: process.stdout})
 
-  if (channels.length === 1) {
-    const channel = channels[0]
-    console.log(`\nUsing channel: ${channel.snippet.title} (${channel.id})`)
-    return channel.id
-  }
+  try {
+    console.log('\nChannel linked to this token:')
+    for (const [index, channel] of channels.entries()) {
+      console.log(`  ${index + 1}. ${channel.snippet.title} (${channel.id})`)
+    }
 
-  console.log('\nMultiple channels found. Select one:')
-  for (const [index, channel] of channels.entries()) {
-    console.log(`  ${index + 1}. ${channel.snippet.title} (${channel.id})`)
-  }
+    console.log(`  ${channels.length + 1}. Enter a channel ID manually (for brand accounts)`)
 
-  return new Promise((resolve, reject) => {
-    process.stdout.write('\nEnter number: ')
-    process.stdin.setEncoding('utf8')
-    process.stdin.once('data', data => {
-      const choice = Number.parseInt(data.trim(), 10)
-      if (choice >= 1 && choice <= channels.length) {
-        resolve(channels[choice - 1].id)
-      } else {
-        reject(new Error('Invalid selection'))
+    const answer = await prompt(rl, '\nEnter number: ')
+    const choice = Number.parseInt(answer.trim(), 10)
+
+    if (choice >= 1 && choice <= channels.length) {
+      return channels[choice - 1].id
+    }
+
+    if (choice === channels.length + 1) {
+      const id = await prompt(rl, 'Enter channel ID: ')
+      const channelId = id.trim()
+      if (channelId) {
+        return channelId
       }
-    })
-  })
+
+      throw new Error('No channel ID provided')
+    }
+
+    throw new Error('Invalid selection')
+  } finally {
+    rl.close()
+  }
 }
 
 export async function authenticate() {
@@ -164,7 +175,7 @@ export async function runAuthFlow() {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline', // eslint-disable-line camelcase
     scope: SCOPES,
-    prompt: 'consent',
+    prompt: 'select_account consent',
   })
 
   const code = await waitForAuthCode(authUrl)
