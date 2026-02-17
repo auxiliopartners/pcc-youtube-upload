@@ -19,7 +19,7 @@ node src/index.js --help
 
 **Expected output:**
 ```
-1.0.0
+1.1.0
 
 Usage: pcc-youtube-upload [options] [command]
 

@@ -31,7 +31,7 @@ async function getCredentialsFrom1Password() {
   const client = await createClient({
     auth: token,
     integrationName: 'pcc-youtube-upload',
-    integrationVersion: '1.0.0',
+    integrationVersion: '1.1.0',
   })
 
   const clientId = await client.secrets.resolve(process.env.OP_GOOGLE_CLIENT_ID || 'op://Private/Google OAuth YouTube/client_id')

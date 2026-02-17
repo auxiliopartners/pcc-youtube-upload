@@ -76,8 +76,7 @@ This will:
 - Default YouTube Data API quota: **10,000 units/day**
 - Each video upload costs **1,600 units**
 - Each thumbnail set costs **50 units**
-- Each playlist item add costs **50 units**
-- Effective capacity: **~6 videos/day** with thumbnails and playlist adds
+- Effective capacity: **~6 videos/day** with thumbnails
 - Quota resets at **midnight Pacific Time**
 
 To request a quota increase, go to **APIs & Services > YouTube Data API v3 > Quotas** and click **Edit Quotas**.
