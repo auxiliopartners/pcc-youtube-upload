@@ -44,9 +44,7 @@ export function generateReport(items, libraryById, state) {
         speaker: libraryEntry?.speaker,
         youtubeVideoId: videoState.youtubeVideoId,
         youtubeUrl: videoState.youtubeUrl,
-        playlistId: item.series?.id ? state.playlists[item.series.id]?.youtubePlaylistId : null,
         thumbnailUploaded: videoState.thumbnailUploaded,
-        addedToPlaylist: videoState.addedToPlaylist,
         uploadedAt: videoState.uploadedAt,
       })
     }
@@ -59,7 +57,6 @@ export function generateReport(items, libraryById, state) {
       uploaded,
       failed,
       pending,
-      playlists: Object.keys(state.playlists).length,
     },
     videos,
   }

@@ -3,11 +3,7 @@ import logger from '../utils/logger.js'
 export const DAILY_QUOTA = 10_000
 export const UPLOAD_COST = 1600
 export const THUMBNAIL_COST = 50
-export const PLAYLIST_INSERT_COST = 50
-export const PLAYLIST_ITEM_COST = 50
-export const PLAYLIST_IMAGE_COST = 50
-export const LIST_COST = 1
-export const VIDEO_TOTAL_COST = UPLOAD_COST + THUMBNAIL_COST + PLAYLIST_ITEM_COST // 1700
+export const VIDEO_TOTAL_COST = UPLOAD_COST + THUMBNAIL_COST // 1650
 
 function getPacificDate(date = new Date()) {
   return date.toLocaleDateString('en-CA', {timeZone: 'America/Los_Angeles'})

@@ -1,6 +1,6 @@
 # PCC YouTube Upload
 
-Bulk upload a sermon video archive from Google Shared Drive to YouTube. Streams video files directly from Drive to YouTube, creates playlists from sermon series, sets thumbnails, and tracks progress across multi-day runs with automatic quota management.
+Bulk upload a sermon video archive from Google Shared Drive to YouTube. Streams video files directly from Drive to YouTube, sets thumbnails, and tracks progress across multi-day runs with automatic quota management.
 
 ## Prerequisites
 
@@ -39,7 +39,6 @@ yarn start upload
 | `yarn start upload` | Start or resume the upload process |
 | `yarn start upload --dry-run` | Preview what would be uploaded without making changes |
 | `yarn start upload --item <id>` | Upload a single item by manifest ID |
-| `yarn fix-playlists` | Retry adding uploaded videos to their playlists |
 | `yarn start status` | Show current quota usage and upload progress |
 | `yarn start report` | Generate a JSON report of all uploads |
 
@@ -47,22 +46,18 @@ yarn start upload
 
 1. **Auth** — OAuth 2.0 credentials are retrieved from 1Password. On first run, you authorize via browser and select the target YouTube channel (brand account supported). Tokens are saved locally in `tokens.json`.
 
-2. **Manifest Loading** — Three JSON files are read from the Google Shared Drive:
+2. **Manifest Loading** — Two JSON files are read from the Google Shared Drive:
    - `manifest.json` — video inventory with file references and dates
    - `library.json` — speaker, scripture, and summary metadata
-   - `series.json` — sermon series for playlist grouping
 
-3. **Playlist Creation** — A YouTube playlist is created for each series in `series.json`.
-
-4. **Upload Loop** — Videos are uploaded oldest-first. For each item:
+3. **Upload Loop** — Videos are uploaded oldest-first. For each item:
    - Stream video from Drive to YouTube (no local temp files)
    - Set thumbnail (priority: `image_wide` > `image_banner` > `thumbnail_01`)
-   - Add to the appropriate series playlist with position ordering
    - Videos are uploaded as **private** with category "Nonprofits & Activism"
 
-5. **Quota Management** — YouTube API quota (10,000 units/day) is tracked automatically. Each video costs ~1,700 units (upload + thumbnail + playlist add), allowing ~5-6 videos per day. When quota is exhausted, the process sleeps until midnight Pacific and resumes.
+4. **Quota Management** — YouTube API quota (10,000 units/day) is tracked automatically. Each video costs ~1,650 units (upload + thumbnail), allowing ~6 videos per day. When quota is exhausted, the process sleeps until midnight Pacific and resumes.
 
-6. **State Persistence** — Progress is saved to `upload-state.json` after each operation. If interrupted, `yarn start upload` picks up where it left off.
+5. **State Persistence** — Progress is saved to `upload-state.json` after each operation. If interrupted, `yarn start upload` picks up where it left off.
 
 ## Project Structure
 
@@ -71,10 +66,9 @@ src/
 ├── index.js        CLI entry point (commander)
 ├── auth.js         OAuth 2.0 flow with 1Password + brand account support
 ├── drive.js        Google Drive API — file lookup, streaming, JSON loading
-├── manifest.js     Load and merge manifest/library/series from Drive
+├── manifest.js     Load and merge manifest/library from Drive
 ├── metadata.js     Build YouTube title, description, tags from manifest data
 ├── youtube.js      YouTube API wrapper with retry logic
-├── playlists.js    Playlist creation and video insertion
 ├── upload.js       Upload orchestration loop with quota-aware sleeping
 ├── state.js        JSON state persistence for resumable uploads
 ├── quota.js        Quota tracking, reset at midnight Pacific

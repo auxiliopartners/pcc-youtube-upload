@@ -2,7 +2,6 @@ import logger from '../utils/logger.js'
 import {getFileStream, getFileBuffer, bufferToStream} from './drive.js'
 import {buildVideoMetadata, getThumbnailFilename} from './metadata.js'
 import {uploadVideo as ytUploadVideo, setThumbnail, withRetry} from './youtube.js'
-import {addVideoToPlaylist} from './playlists.js'
 import {setVideoState, getVideoState} from './state.js'
 import {
   canUploadMore, trackQuota, resetQuotaIfNewDay, getMsUntilMidnightPacific, UPLOAD_COST, THUMBNAIL_COST,
@@ -81,23 +80,12 @@ async function uploadSingleVideo(item, libraryEntry, state) {
     }
   }
 
-  // Add to playlist
-  let addedToPlaylist = false
-  if (item.series?.id) {
-    try {
-      addedToPlaylist = await addVideoToPlaylist(videoId, item.series.id, state)
-    } catch (error) {
-      logger.error({err: error, videoId, seriesId: item.series.id}, 'Failed to add video to playlist')
-    }
-  }
-
   setVideoState(state, item.id, {
     status: 'complete',
     youtubeVideoId: videoId,
     youtubeUrl: `https://youtu.be/${videoId}`,
     uploadedAt: new Date().toISOString(),
     thumbnailUploaded,
-    addedToPlaylist,
   })
 
   return videoId
@@ -175,38 +163,6 @@ export async function runUpload(items, libraryById, state, {singleItemId, dryRun
   }
 
   return {uploaded, errors}
-}
-
-export async function retryPlaylistAdds(items, state) {
-  const itemsById = new Map(items.map(i => [i.id, i]))
-  let fixed = 0
-  let errors = 0
-
-  for (const [itemId, videoState] of Object.entries(state.videos)) {
-    if (videoState.status !== 'complete' || videoState.addedToPlaylist !== false) {
-      continue
-    }
-
-    const item = itemsById.get(itemId)
-    if (!item?.series?.id) {
-      logger.warn({itemId}, 'No series info for video, skipping playlist retry')
-      continue
-    }
-
-    try {
-      const added = await addVideoToPlaylist(videoState.youtubeVideoId, item.series.id, state) // eslint-disable-line no-await-in-loop
-      if (added) {
-        setVideoState(state, itemId, {addedToPlaylist: true})
-        fixed++
-        logger.info({itemId, videoId: videoState.youtubeVideoId, series: item.series.title}, 'Playlist add retry succeeded')
-      }
-    } catch (error) {
-      errors++
-      logger.error({err: error, itemId, videoId: videoState.youtubeVideoId}, 'Playlist add retry failed')
-    }
-  }
-
-  return {fixed, errors}
 }
 
 function runDryRun(items, libraryById, state) {

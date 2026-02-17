@@ -12,7 +12,6 @@ const defaultState = {
   updatedAt: null,
   quotaUsedToday: 0,
   quotaResetDate: null,
-  playlists: {},
   videos: {},
 }
 
@@ -41,14 +40,6 @@ export function setVideoState(state, itemId, videoState) {
   state.videos[itemId] = {
     ...state.videos[itemId],
     ...videoState,
-  }
-  saveState(state)
-}
-
-export function setPlaylistState(state, seriesId, playlistInfo) {
-  state.playlists[seriesId] = {
-    ...state.playlists[seriesId],
-    ...playlistInfo,
   }
   saveState(state)
 }
