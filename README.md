@@ -2,6 +2,8 @@
 
 Bulk upload a sermon video archive from Google Shared Drive to YouTube. Streams video files directly from Drive to YouTube, sets thumbnails, and tracks progress across multi-day runs with automatic quota management.
 
+[![Watch the walkthrough](https://img.youtube.com/vi/onfKuY4gkGI/maxresdefault.jpg)](https://www.youtube.com/watch?v=onfKuY4gkGI)
+
 ## Prerequisites
 
 - Node.js >= 20.0.0
